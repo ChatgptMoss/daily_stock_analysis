@@ -1,8 +1,8 @@
-# Daily Stock Analysis
+# StockPilot AI
 
-一个面向个人自选股复盘的 AI 分析工作台。项目把行情与新闻检索、确定性技术指标、LLM 分析、Agent 工具调用、结构化报告和异步任务流串成一条可回放的链路。
+StockPilot AI 是一个面向个人自选股复盘的 AI 分析工作台，把行情与新闻检索、确定性技术指标、LLM 分析、Agent 工具调用、结构化报告和异步任务流串成一条可回放的链路。
 
-这个仓库用于学习和实践 AI 应用工程。它基于 [ZhuLinsen/daily_stock_analysis](https://github.com/ZhuLinsen/daily_stock_analysis) 进行整理和改造，保留原项目的 MIT 许可证与来源信息。下面的说明重点放在 Agent、Prompt、模型接入、数据 fallback 和任务可靠性等模块。
+这个项目用于学习和实践 AI 应用工程，重点覆盖 Agent、Prompt、模型接入、数据 fallback 和任务可靠性等模块。
 
 ## 功能概览
 
@@ -171,4 +171,4 @@ python -m pytest -m "not network"
 
 ## License
 
-[MIT License](LICENSE)。本项目基于开源项目进行学习和改造，使用或二次开发时请保留许可证和来源说明。
+[MIT License](LICENSE)。使用或二次开发时请保留 LICENSE 中的版权和许可声明。

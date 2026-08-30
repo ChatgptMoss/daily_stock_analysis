@@ -1,4 +1,4 @@
-# Agent Architecture
+# StockPilot AI Agent Architecture
 
 这份文档只记录项目当前真实的 Agent 运行链路，方便开发、排错和面试准备。它不是模型提示词大全，也不把未来计划描述成已经实现的能力。
 
