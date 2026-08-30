@@ -49,6 +49,7 @@ from src.market_context import get_market_role, get_market_guidelines
 logger = logging.getLogger(__name__)
 
 
+# 简要作用：检查分析报告的必填字段是否完整，确保大模型生成的 JSON 正常可用
 def check_content_integrity(result: "AnalysisResult") -> Tuple[bool, List[str]]:
     """
     Check mandatory fields for report content integrity.
@@ -83,6 +84,7 @@ def check_content_integrity(result: "AnalysisResult") -> Tuple[bool, List[str]]:
     return len(missing) == 0, missing
 
 
+# 简要作用：对缺失的必填字段进行占位符填充，防止后续流程报错失败
 def apply_placeholder_fill(result: "AnalysisResult", missing_fields: List[str]) -> None:
     """Fill missing mandatory fields with placeholders (in-place). Module-level for pipeline."""
     placeholder = get_placeholder_text(getattr(result, "report_language", "zh"))
@@ -123,6 +125,7 @@ def apply_placeholder_fill(result: "AnalysisResult", missing_fields: List[str]) 
 _CHIP_KEYS: tuple = ("profit_ratio", "avg_cost", "concentration", "chip_health")
 
 
+# 简要作用：内部辅助：判断某个字段值是否为空或属于无意义的占位符（如 "N/A"、"未知"）
 def _is_value_placeholder(v: Any) -> bool:
     """True if value is empty or placeholder (N/A, 数据缺失, etc.)."""
     if v is None:
@@ -133,6 +136,7 @@ def _is_value_placeholder(v: Any) -> bool:
     return s in ("", "n/a", "na", "数据缺失", "未知", "data unavailable", "unknown", "tbd")
 
 
+# 简要作用：内部辅助：安全地进行 float 转换，遇到非数字或异常时安全降级返回默认值
 def _safe_float(v: Any, default: float = 0.0) -> float:
     """Safely convert to float; return default on failure. Private helper for chip fill."""
     if v is None:
@@ -148,6 +152,7 @@ def _safe_float(v: Any, default: float = 0.0) -> float:
         return default
 
 
+# 简要作用：内部辅助：根据获利比例和筹码集中度，推算出股票筹码的健康状态
 def _derive_chip_health(profit_ratio: float, concentration_90: float, language: str = "zh") -> str:
     """Derive chip_health from profit_ratio and concentration_90."""
     if profit_ratio >= 0.9:
@@ -159,6 +164,7 @@ def _derive_chip_health(profit_ratio: float, concentration_90: float, language: 
     return localize_chip_health("一般", language)
 
 
+# 简要作用：内部辅助：将原始的筹码分布数据对象转换为包含比例字典的标准数据结构
 def _build_chip_structure_from_data(chip_data: Any, language: str = "zh") -> Dict[str, Any]:
     """Build chip_structure dict from ChipDistribution or dict."""
     if hasattr(chip_data, "profit_ratio"):
@@ -179,6 +185,7 @@ def _build_chip_structure_from_data(chip_data: Any, language: str = "zh") -> Dic
     }
 
 
+# 简要作用：兜底机制：当 LLM 没有成功提取出筹码数据时，使用系统本地计算好的底层数据强行填充补充
 def fill_chip_structure_if_needed(result: "AnalysisResult", chip_data: Any) -> None:
     """When chip_data exists, fill chip_structure placeholder fields from chip_data (in-place)."""
     if not result or not chip_data:
@@ -210,6 +217,7 @@ def fill_chip_structure_if_needed(result: "AnalysisResult", chip_data: Any) -> N
 _PRICE_POS_KEYS = ("ma5", "ma10", "ma20", "bias_ma5", "bias_status", "current_price", "support_level", "resistance_level")
 
 
+# 简要作用：兜底机制：当 LLM 没有提取全量价指标时，用本地底层数据进行自动补充
 def fill_price_position_if_needed(
     result: "AnalysisResult",
     trend_result: Any = None,
@@ -261,6 +269,7 @@ def fill_price_position_if_needed(
         logger.warning("[price_position] Fill failed, skipping: %s", e)
 
 
+# 简要作用：股票名解析：按优先级尝试从多数据流来源（Context、实时行情、缓存等）解析出股票的准确名称
 def get_stock_name_multi_source(
     stock_code: str,
     context: Optional[Dict] = None,
@@ -1077,6 +1086,7 @@ class GeminiAnalyzer:
 
         raise Exception(f"All LLM models failed (tried {len(models_to_try)} model(s)). Last error: {last_error}")
 
+    # 简要作用：公共接口：用于直接调用底层 LLM 进行纯文本的自由对话或自然语言生成
     def generate_text(
         self,
         prompt: str,
@@ -1111,6 +1121,7 @@ class GeminiAnalyzer:
             logger.error("[generate_text] LLM call failed: %s", exc)
             return None
 
+    # 简要作用：核心接口：执行完整股票分析流程主入口，它将请求数据组装为 Prompt，调用模型并捕获并解析返回结果
     def analyze(
         self, 
         context: Dict[str, Any],
@@ -1276,6 +1287,7 @@ class GeminiAnalyzer:
                 report_language=report_language,
             )
     
+    # 简要作用：内部核心：把技术面指标、新闻舆情和结构约束格式化拼装给大模型的 Prompt 长文本
     def _format_prompt(
         self, 
         context: Dict[str, Any], 
